@@ -1,0 +1,61 @@
+doctype html
+html
+    head
+        title Homework-67
+        link(rel='stylesheet', href='/styles.css')
+    body
+        h1 Welcome to Homework-67
+        p Manage your tasks easily!
+
+        form#taskForm(action='/tasks', method='POST')
+            input(type='text', id='title', name='title', placeholder='Enter task title', required)
+            textarea(id='description', name='description', placeholder='Enter task description', required)
+            button(type='submit') Add Task
+
+        h2 Task List
+        ul#taskList
+            each task in tasks
+                li(class=task.completed ? 'completed' : '')
+                    span #{task.title} - #{task.description}
+                    button.delete-btn(data-id=task._id) ❌
+
+        script(src='https://code.jquery.com/jquery-3.6.0.min.js')
+        script.
+            $(document).ready(function() {
+                // Добавление новой задачи
+                $('#taskForm').submit(function(e) {
+                    e.preventDefault();
+                    const title = $('#title').val();
+                    const description = $('#description').val();
+
+                    $.ajax({
+                        url: '/tasks',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ title, description }),
+                        success: function(response) {
+                            $('#title').val('');
+                            $('#description').val('');
+                            const newTask = $('<li>')
+                                .append($('<span>').text(response.title + ' - ' + response.description))
+                                .append($('<button>').text('❌').addClass('delete-btn').attr('data-id', response._id));
+                            newTask.hide().fadeIn(500);
+                            $('#taskList').append(newTask);
+                        }
+                    });
+                });
+
+                // Видалення задачі
+                $('#taskList').on('click', '.delete-btn', function() {
+                    const taskId = $(this).data('id');
+                    const listItem = $(this).closest('li');
+
+                    $.ajax({
+                        url: `/tasks/${taskId}`,
+                        type: 'DELETE',
+                        success: function() {
+                            listItem.fadeOut(500, function() { $(this).remove(); });
+                        }
+                    });
+                });
+            });

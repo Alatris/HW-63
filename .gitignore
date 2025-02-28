@@ -1,1 +1,7 @@
-/node_modules
+# Node.js
+/node_modules/
+
+.dockerignore
+
+/public/styles.css
+FQQPUWWhanZsgzMa
